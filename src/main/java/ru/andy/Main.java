@@ -1,8 +1,13 @@
 package ru.andy;
 
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,6 +17,7 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Map;
 
 public class Main {
 
@@ -22,7 +28,6 @@ public class Main {
 
     public static void main(String[] args) {
         javaEightVariant();
-        javaElevenVariant();
     }
 
     private static void javaEightVariant() {
@@ -53,7 +58,7 @@ public class Main {
                 reader.close();
             }
 
-            parseJson(responseContent.toString());
+            parseJsonPureJava(responseContent.toString());
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -81,5 +86,19 @@ public class Main {
             System.out.println(id + " " + userId + " " + title);
         }
         return null;
+    }
+
+    private static Map<String, ScriptObjectMirror> parseJsonPureJava(String json) {
+        ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
+        ScriptEngine scriptEngine = scriptEngineManager.getEngineByName("javascript");
+
+        Map<String, ScriptObjectMirror> result = null;
+        try {
+            result = (Map<String, ScriptObjectMirror>) scriptEngine.eval(json);
+            result.forEach((key, value) -> System.out.println(key + " " + value.entrySet() + "/n"));
+        } catch (ScriptException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }
